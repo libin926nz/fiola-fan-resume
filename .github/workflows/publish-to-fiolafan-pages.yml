@@ -1,0 +1,31 @@
+name: Publish to fiolafan.com (Pages repo)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Push to briarlee/fiola-fan-resume (GitHub Pages)
+        env:
+          UPSTREAM_TOKEN: ${{ secrets.BRIARLEE_PAGES_PUSH_TOKEN }}
+        run: |
+          if [ -z "$UPSTREAM_TOKEN" ]; then
+            echo "::warning::BRIARLEE_PAGES_PUSH_TOKEN is not configured. Live site at fiolafan.com will not update until this secret is set."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add pages "https://x-access-token:${UPSTREAM_TOKEN}@github.com/briarlee/fiola-fan-resume.git"
+          git push pages HEAD:main
